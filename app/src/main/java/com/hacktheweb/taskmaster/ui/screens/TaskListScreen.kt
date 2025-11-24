@@ -1,5 +1,7 @@
 package com.hacktheweb.taskmaster.ui.screens
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,12 +14,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hacktheweb.taskmaster.model.Priority
 import com.hacktheweb.taskmaster.model.Task
 import com.hacktheweb.taskmaster.viewmodel.SortOption
 import com.hacktheweb.taskmaster.viewmodel.TaskViewModel
 
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
@@ -29,7 +34,13 @@ fun TaskListScreen(
     var selectedPriority by remember { mutableStateOf<Priority?>(null) }
     var sortOption by remember { mutableStateOf(SortOption.PRIORITY) }
     var showStatistics by remember { mutableStateOf(false) }
-
+    var showDialog by remember{mutableStateOf(false)}
+    var selected by remember{mutableIntStateOf(-1)}
+    if (showDialog){
+        EditDeleteDialog ("Do you really want to Delete?",{showDialog = false}) {
+            viewModel.deleteTask(selected)
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,7 +110,10 @@ fun TaskListScreen(
                     TaskItem(
                         task = task,
                         onToggleComplete = { viewModel.toggleTaskCompletion(task.id) },
-                        onDelete = { viewModel.deleteTask(task.id) },
+                        onDelete = {
+                            showDialog=true
+                            selected = task.id
+                                   },
                         onClick = { onNavigateToDetail(task.id) }
                     )
                 }
